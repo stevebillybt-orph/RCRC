@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ecece5">
+  <title>RCRC — 遙控車原理實驗室</title>
+  <meta name="description" content="親手拆解、轉動、操控一架 1:10 Crawler。用互動 3D 理解動力、轉向、四輪驅動與車架。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect width=%2240%22 height=%2240%22 rx=%228%22 fill=%22%232a332d%22/><text x=%228%22 y=%2229%22 font-size=%2226%22 fill=%22%23e8f3a5%22>R</text></svg>">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+  <header class="masthead">
+    <a href="./" class="brand" aria-label="RCRC 首頁">RC<span>RC</span><i></i></a>
+    <div class="brand-meta">FIELD NOTES / 001<br><strong>遙控車原理實驗室</strong></div>
+    <div class="header-right"><span class="live-dot"></span> INTERACTIVE MECHANICS <button id="about" class="icon-button" aria-label="關於模型與參考資料">?</button></div>
+  </header>
+  <section class="chapter-bar" aria-label="選擇學習主題">
+    <div class="chapter-caption">拆開來，先看懂。</div>
+    <nav id="chapters">
+      <button data-topic="all" class="active"><small>00</small> 全車總覽</button>
+      <button data-topic="power"><small>01</small> 動力來源</button>
+      <button data-topic="steering"><small>02</small> 轉向系統</button>
+      <button data-topic="drive"><small>03</small> 四輪驅動</button>
+      <button data-topic="chassis"><small>04</small> 車架與懸掛</button>
+    </nav>
+  </section>
+  <main class="lab">
+    <aside class="parts-panel">
+      <div class="section-label">COMPONENT INDEX <span>13</span></div>
+      <p class="parts-hint">點一件，睇清楚。<br>其餘部件會自動半透明。</p>
+      <div id="part-list"></div>
+      <div class="left-bottom"><span class="tiny-square"></span><p>1:10 ELECTRIC CRAWLER<br><strong>Vanquish 方向 · 原理示意模型</strong></p></div>
+    </aside>
+    <section class="viewport" id="viewport" aria-label="可旋轉縮放的遙控車 3D 模型">
+      <div class="scene-head"><div><span class="eyebrow" id="scene-number">VEHICLE 01 / UNDER THE SHELL</span><h1 id="scene-title">每一個部件，<br>都有佢嘅角色。</h1></div><span class="scale-tag">1 : 10</span></div>
+      <div id="canvas-wrap"></div><div id="labels"></div><div id="hover-tip" hidden></div>
+      <div id="loading">正在裝配 3D 模型<span></span></div>
+      <div class="scene-toolbar">
+        <div class="segmented" aria-label="車殼顯示"><button data-shell="off" class="active">拆殼</button><button data-shell="ghost">透明殼</button><button data-shell="solid">完整車</button></div>
+        <button id="labels-toggle" class="tool-button active" aria-pressed="true" title="顯示部件標籤">標籤</button>
+        <button id="rotate-toggle" class="tool-button" aria-pressed="false" title="自動旋轉模型">自轉</button>
+      </div>
+      <div class="view-side"><button id="zoom-in" aria-label="放大模型">＋</button><button id="zoom-out" aria-label="縮小模型">−</button><span></span><button id="reset-view" aria-label="重設視角" title="重設視角">↺</button><button id="fullscreen" aria-label="全螢幕模型" title="全螢幕模型">⛶</button></div>
+      <div class="scene-bottom">
+        <div class="view-presets" aria-label="預設視角"><button data-view="three" class="active">3D</button><button data-view="front">正面</button><button data-view="side">側面</button><button data-view="top">俯視</button><button data-view="bottom">底盤</button></div>
+        <p class="gesture-hint">拖曳旋轉 <span>·</span> 滾輪 / 雙指縮放 <span>·</span> 點選部件</p>
+      </div>
+      <div class="view-status"><span id="motion-dot"></span><span id="motion-status">靜止 · 試下操作右邊遙控器</span></div>
+    </section>
+    <aside class="inspector">
+      <section class="explanation" aria-live="polite">
+        <div class="section-label"><span id="detail-kicker">THE BIG PICTURE</span><button id="clear-selection" title="取消選取" aria-label="取消選取並顯示全車" hidden>×</button></div>
+        <div id="detail-content"></div>
+      </section>
+      <section class="remote-panel" aria-label="互動遙控器">
+        <div class="section-label">試下，控制佢。<span class="connected"><i></i> 已連線</span></div>
+        <div class="remote-visual">
+          <svg id="transmitter" viewBox="0 0 185 195" role="img" aria-label="手槍式遙控器，轉動側面軚盤控制方向，扣動扳機控制油門">
+            <defs><linearGradient id="remote-grad" x2="1" y2="1"><stop stop-color="#485148"/><stop offset="1" stop-color="#252d28"/></linearGradient><filter id="remote-shadow"><feDropShadow dx="1" dy="5" stdDeviation="4" flood-opacity=".16"/></filter></defs>
+            <g filter="url(#remote-shadow)"><path d="M70 32 L66 8 Q66 4 71 4 L76 30" stroke="#303b31" stroke-width="7" stroke-linecap="round"/>
+            <path d="M43 37 Q40 28 52 26 L121 29 Q134 32 135 45 L139 83 Q137 96 124 98 L99 98 L90 150 L107 158 L106 176 Q76 184 38 174 L38 159 L54 148 L61 99 L42 82Z" fill="url(#remote-grad)"/>
+            <path d="M62 102 L85 105 L77 147 L56 144Z" fill="#1f2722"/>
+            <path d="M47 159 L99 160 L99 169 L47 168Z" fill="#68725c"/>
+            <rect x="51" y="36" width="54" height="31" rx="4" fill="#101e18"/>
+            <rect x="55" y="40" width="46" height="22" rx="2" fill="#bdd08c"/>
+            <text x="60" y="49" font-size="6" font-family="monospace" fill="#2b3928">RCRC / CH2</text><text id="tx-screen" x="60" y="58" font-size="8" font-family="monospace" fill="#2b3928">TH 0%</text>
+            <circle cx="49" cy="73" r="3" fill="#c8df94"/>
+            <g id="trigger" style="transform-origin:90px 93px"><path d="M91 94 Q108 113 91 130" fill="none" stroke="#e0784c" stroke-width="8" stroke-linecap="round"/></g>
+            <g id="tx-wheel" style="transform-origin:128px 80px"><circle cx="128" cy="80" r="30" fill="#18211c" stroke="#5d6857" stroke-width="3"/><circle cx="128" cy="80" r="23" fill="#8a9282" stroke="#262e26" stroke-width="3"/><path d="M128 58 L128 78 M108 90 L126 80 M147 92 L130 81" stroke="#2c362c" stroke-width="9"/><circle cx="128" cy="80" r="8" fill="#333e32"/><path d="M125 50 L131 50" stroke="#d8eb9d" stroke-width="4" stroke-linecap="round"/></g>
+            <text x="58" y="87" fill="#a5ac9b" font-size="8" font-family="monospace">RC/01</text></g>
+          </svg>
+          <div class="remote-readout"><span>CH 1 / STEERING</span><strong id="steering-readout">0° <em>置中</em></strong><span>CH 2 / THROTTLE</span><strong id="throttle-readout">0<em>%</em></strong><small>拖動軚盤，或者用下方滑桿。</small></div>
+        </div>
+        <label class="range-label" for="steering"><span>轉向</span><small>左 ← → 右</small><button id="center-steering" type="button">回中</button></label>
+        <input id="steering" type="range" min="-100" max="100" value="0" aria-label="轉向角度">
+        <label class="range-label" for="throttle"><span>油門</span><small>後退 ← 0 → 前進</small></label>
+        <input id="throttle" type="range" min="-100" max="100" value="0" aria-label="油門：負數後退，正數前進">
+        <div class="drive-buttons"><button id="reverse-hold">↓ 按住後退</button><button id="stop" class="stop-button">停止</button><button id="forward-hold">↑ 按住前進</button></div>
+        <p class="remote-note">架空運轉示範，車身留在原位。<br>油門滑桿會保持設定；按「停止」歸零。</p>
+      </section>
+    </aside>
+  </main>
+  <section class="flow-strip" aria-label="系統運作路徑"><div class="flow-title"><span class="eyebrow">FOLLOW THE FLOW</span><strong id="flow-heading">由你嘅手，到四個車輪。</strong></div><div id="flow-steps"></div><button id="demo" class="demo-button">▷ 自動示範</button></section>
+  <footer><span>RCRC / EXPLORE AT A DIFFERENT SCALE.</span><span>通用 4WD 直橋教學模型 · 非特定車款裝配圖 <button id="sources">模型說明 ↗</button></span></footer>
+  <dialog id="about-dialog"><button class="close-dialog" aria-label="關閉說明">×</button><span class="eyebrow">ABOUT THIS EXPLORER</span><h2>先理解原理，<br>再決定點樣砌。</h2><p>按你之前嘅 Vanquish 1:10 Crawler＋Land Cruiser 車殼方向製作。底盤、馬達同電子零件未有最終定案，所以呢個係可互動嘅通用機械示意，唔係指定 Vanquish 套件嘅精確 CAD。</p><ul><li>示範獨立有刷馬達＋ESC、內置 BEC、前輪轉向、前後鎖定車橋及連桿懸掛。</li><li>為方便學習，採用直橋及等速前後輸出，未模擬門橋、DIG 或前橋 Overdrive。實際 Vanquish 型號可能具有呢啲功能。</li><li>車輪、齒輪與電流動畫用作解釋因果；顯示比例、齒比、電壓及擺位唔代表購物清單、裝配規格或物理模擬。</li><li>遙控器傳送控制訊號；推動車輛嘅電力來自車上電池。FPV 鏡頭與 Goggles 3 屬影像系統，唔屬呢個基礎操控示範。</li></ul><h3>原理參考</h3><a href="https://vanquishproducts.com/products/vrd-builders-kit-straight-axle" target="_blank" rel="noopener">Vanquish — VRD 直橋、傳動軸、連桿結構 ↗</a><a href="https://vanquishproducts.com/products/vs4-10-builders-kit-straight-axle" target="_blank" rel="noopener">Vanquish — VS4-10 車架及傳動配置 ↗</a><a href="https://www.hobbywing.com/en/uploads/file/20240229/e4c11442cc2101bb152102f6c72b20fa.pdf" target="_blank" rel="noopener">Hobbywing — 1080 G2 電源、接收器與 BEC 接線 ↗</a></dialog>
+  <noscript>請開啟 JavaScript，以使用互動 3D 模型。</noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
